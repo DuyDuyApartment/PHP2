@@ -61,7 +61,7 @@
                         @endif
                     @endforeach
                 </div>
-                @yield('content')
+                <!-- @yield('content') -->
             </div>
         </main>
     </div>

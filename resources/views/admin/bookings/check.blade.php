@@ -1,11 +1,16 @@
-@extends('admin.layouts.app') <!-- Hoặc @extends('layouts.app') tùy cấu trúc -->
+@extends('layouts.app')
 @section('title')
     Danh Sách Đặt Phòng Đợi Duyệt
 @endsection
 @section('content')
-    @if (session('success'))
+    @if (session('alert-success'))
         <div class="alert alert-success">
-            {{ session('success') }}
+            {{ session('alert-success') }}
+        </div>
+    @endif
+    @if (session('alert-danger'))
+        <div class="alert alert-danger">
+            {{ session('alert-danger') }}
         </div>
     @endif
     @if (session('error'))
@@ -56,11 +61,13 @@
                                         <form method="POST" action="{{ route('backend.booking.update', $booking->bk_ma) }}" onsubmit="return confirm('Bạn có xác nhận duyệt đặt phòng?');" style="display: inline-block;">
                                             @csrf
                                             @method('PUT')
+                                            <input type="hidden" name="bk_ma" value="{{ $booking->bk_ma }}">
                                             <input type="submit" class="btn btn-xs btn-success" value="Duyệt">
                                         </form>
                                         <form method="POST" action="{{ route('backend.booking.edit', $booking->bk_ma) }}" onsubmit="return confirm('Bạn có xác nhận hủy đặt phòng?');" style="display: inline-block;">
                                             @csrf
                                             @method('PATCH')
+                                            <input type="hidden" name="bk_ma" value="{{ $booking->bk_ma }}">
                                             <input type="submit" class="btn btn-xs btn-danger" value="Hủy">
                                         </form>
                                     </td>
@@ -79,7 +86,6 @@
     <script>
         $(function() {
             let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons);
-            // Kiểm tra nếu DataTable đã được khởi tạo, hủy (destroy) trước khi khởi tạo lại
             if ($.fn.DataTable.isDataTable('.datatable-Room:not(.ajaxTable)')) {
                 $('.datatable-Room:not(.ajaxTable)').DataTable().destroy();
             }
@@ -87,7 +93,7 @@
                 buttons: dtButtons,
                 order: [[1, 'desc']],
                 pageLength: 50,
-                responsive: true // Thêm responsive để cải thiện hiển thị
+                responsive: true
             });
             $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
                 $($.fn.dataTable.tables(true)).DataTable().columns.adjust();

@@ -66,11 +66,11 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('/user', 'Frontend\UserController');
 
 //booking backend khach dat phong
-Route::get('/Backend/booking', 'Frontend\BookingController@index')->name('backend.booking.index');
-Route::match(['POST', 'PUT'], '/Backend/booking/update', 'Frontend\BookingController@update')->name('backend.booking.update'); // Sửa route để hỗ trợ cả POST và PUT
-Route::post('/Backend/booking/edit', 'Frontend\BookingController@edit')->name('backend.booking.edit');
-Route::get('/Backend/booking/{id}/checkin', 'Frontend\BookingController@checkin')->name('backend.booking.checkin');
-Route::get('/Backend/booking/active', 'Frontend\BookingController@active')->name('backend.booking.active'); // Thêm route mới
+Route::get('/Backend/booking', 'Frontend\BookingController@index')->name('backend.booking.index')->middleware(['web', 'auth:admin']);
+Route::put('/Backend/booking/update/{bk_ma}', 'Frontend\BookingController@update')->name('backend.booking.update')->middleware(['web', 'auth:admin']);
+Route::patch('/Backend/booking/edit/{bk_ma}', 'Frontend\BookingController@edit')->name('backend.booking.edit')->middleware(['web', 'auth:admin']);
+Route::get('/Backend/booking/{id}/checkin', 'Frontend\BookingController@checkin')->name('backend.booking.checkin')->middleware(['web', 'auth:admin']);
+Route::get('/Backend/booking/active', 'Frontend\BookingController@active')->name('backend.booking.active')->middleware(['web', 'auth:admin']);
 
 //booking user
 Route::get('orders', 'ExampleController@index')->name('orders');

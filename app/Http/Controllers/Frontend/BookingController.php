@@ -24,31 +24,15 @@ class BookingController extends Controller
      */
     public function index()
     {
-        // Lấy danh sách booking với bk_trangThai = 1, kiểm tra kỹ hơn với LEFT JOIN
         $bookings = DB::select('
             SELECT DISTINCT bk.*, kh.kh_hoTen, kh.kh_dienThoai, p.p_ten
-FROM booking AS bk
-LEFT JOIN khachhang AS kh ON kh.id = bk.kh_ma
-LEFT JOIN phong AS p ON p.p_ma = bk.p_ma
-WHERE bk.bk_trangThai = 1
-ORDER BY bk.bk_taoMoi DESC
+            FROM booking AS bk
+            LEFT JOIN khachhang AS kh ON kh.id = bk.kh_ma
+            LEFT JOIN phong AS p ON p.p_ma = bk.p_ma
+            WHERE bk.bk_trangThai = 1
+            ORDER BY bk.bk_taoMoi DESC
         ');
 
-        // Debug chi tiết hơn
-        \Log::info('Bookings in admin check (admin.bookings.check):', [
-            'bookings' => $bookings,
-            'count' => count($bookings),
-            'query' => 'SELECT DISTINCT bk.*, kh.kh_hoTen, kh.kh_dienThoai, p.p_ten FROM booking AS bk LEFT JOIN khachhang AS kh ON kh.id = bk.kh_ma LEFT JOIN phong AS p ON p.p_ma = bk.p_ma WHERE bk.bk_trangThai = 1 ORDER BY bk.bk_taoMoi DESC'
-        ]);
-
-        // Nếu không có bản ghi, log thêm thông tin
-        if (empty($bookings)) {
-            \Log::warning('No bookings found with bk_trangThai = 1 in admin.bookings.check. Checking database...');
-            $rawCheck = DB::select('SELECT * FROM booking WHERE bk_trangThai = 1');
-            \Log::info('Raw check for bk_trangThai = 1:', ['raw_results' => $rawCheck]);
-        }
-
-        // Trả về view admin.bookings.check (tức là resources/views/admin/bookings/check.blade.php)
         return view('admin.bookings.check', ['bookings' => $bookings]);
     }
 
@@ -126,31 +110,28 @@ ORDER BY bk.bk_taoMoi DESC
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request)
+    public function edit(Request $request, $bk_ma)
     {
         try {
-            $bk_ma = $request->input('bk_ma');
-            $booking = Booking::find($bk_ma);
+            $booking = Booking::where('bk_ma', $bk_ma)->first();
 
             if (!$booking) {
-                return back()->with('error', 'Không tìm thấy booking.');
+                return back()->with('error', 'Không tìm thấy đơn đặt phòng!');
             }
 
             DB::beginTransaction();
 
-            // Cập nhật trạng thái booking thành "Nhân viên từ chối"
-            $booking->bk_trangThai = 6;
+            $booking->bk_trangThai = 6; // Hủy
             $booking->bk_capNhat = Carbon::now('Asia/Ho_Chi_Minh');
             $booking->save();
 
-            // Cập nhật trạng thái phòng thành "Khả dụng"
             $phong = Phong::find($booking->p_ma);
-            $phong->p_trangThai = 2;
+            $phong->p_trangThai = 2; // Khả dụng
             $phong->save();
 
             DB::commit();
 
-            Session::flash('alert-success', 'Đã hủy đặt phòng thành công ^^~!!!');
+            Session::flash('alert-success', 'Đã hủy đặt phòng thành công!');
             return redirect()->route('backend.booking.index');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -166,14 +147,13 @@ ORDER BY bk.bk_taoMoi DESC
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $bk_ma)
     {
         try {
-            $bk_ma = $request->input('bk_ma');
-            $booking = Booking::find($bk_ma);
+            $booking = Booking::where('bk_ma', $bk_ma)->first();
 
             if (!$booking) {
-                return back()->with('error', 'Không tìm thấy booking.');
+                return back()->with('error', 'Không tìm thấy đơn đặt phòng!');
             }
 
             DB::beginTransaction();
@@ -203,24 +183,22 @@ ORDER BY bk.bk_taoMoi DESC
             }
 
             if ($conflict == 1) {
-                Session::flash('alert-danger', 'Phòng đã được đặt, vui lòng thông báo khách hàng @@@!!!');
+                Session::flash('alert-danger', 'Phòng đã được đặt, vui lòng thông báo khách hàng!');
                 return back()->withInput();
             }
 
-            // Cập nhật trạng thái booking thành "Đã xác nhận"
-            $booking->bk_trangThai = 2;
-            $booking->nv_ma = auth()->guard('admin')->user()->id ?? 2; // Gán nhân viên duyệt
+            $booking->bk_trangThai = 2; // Duyệt
+            $booking->nv_ma = auth()->guard('admin')->user()->id ?? 2;
             $booking->bk_capNhat = Carbon::now('Asia/Ho_Chi_Minh');
             $booking->save();
 
-            // Cập nhật trạng thái phòng thành "Đã đặt" (Khóa phòng)
             $phong = Phong::find($booking->p_ma);
-            $phong->p_trangThai = 1;
+            $phong->p_trangThai = 1; // Đã đặt
             $phong->save();
 
             DB::commit();
 
-            Session::flash('alert-success', 'Duyệt đơn đặt phòng thành công ^^~!!!');
+            Session::flash('alert-success', 'Duyệt đơn đặt phòng thành công!');
             return redirect()->route('backend.booking.index');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -248,7 +226,7 @@ ORDER BY bk.bk_taoMoi DESC
         $a = Phong::where("p_ma", $bookings->p_ma)->first();
         $a->p_trangThai = 1;
         $a->update();
-        Session::flash('alert-success', 'Check in khách hàng booking thành công ^^~!!!');
+        Session::flash('alert-success', 'Check in khách hàng booking thành công!');
         return back();
     }
 

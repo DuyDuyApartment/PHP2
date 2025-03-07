@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -78,7 +78,6 @@
             </div>
             <div class="auth-action-right">
                 <div class="auth-image">
-                    <img src="../img/log.jpg" alt="login">
                 </div>
             </div>
         </div>
