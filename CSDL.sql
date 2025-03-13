@@ -431,3 +431,6 @@ ALTER TABLE `nhanvien`
 ALTER TABLE `phong`
   ADD CONSTRAINT `phong_lp_ma_foreign` FOREIGN KEY (`lp_ma`) REFERENCES `loai_phong` (`lp_ma`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
+SELECT * FROM booking
+WHERE p_ma = 54 
+AND DAY(bk_thoiGianBatDau) = DAY(CURRENT_TIMESTAMP);

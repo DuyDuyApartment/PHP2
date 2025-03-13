@@ -28,7 +28,7 @@ Thêm Mới Loại Phòng
                   <input type="text" class="form-control" id="lp_ten" name="lp_ten" value="{{ old('lp_ten') }}">
                 </div>
                 <div class="form-group">
-                  <label for="lp_giaGoc">Giá bán</label>
+                  <label for="lp_giaGoc">Giá thuêthuê</label>
                   <input type="text" class="form-control" id="lp_giaBan" name="lp_giaBan" value="{{ old('lp_giaBan') }}">
                 </div>
                 <div class="form-group">

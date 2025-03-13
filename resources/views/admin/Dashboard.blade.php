@@ -55,7 +55,7 @@ Dashboard
                     <i class="material-icons">price_check</i>
                   </div>
                   <p class="card-category">Doanh Thu: <small>VNĐ</small>    </p>
-                  <h3 class="card-title">+{{$doanhthu*1000}} </h3>
+                  <h3 class="card-title">+{{$doanhthu*100}} </h3>
                 </div>
                 <div class="card-footer">
                   <div class="stats">

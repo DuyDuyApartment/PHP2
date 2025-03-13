@@ -22,7 +22,7 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div style="margin-left: 0" class="container">
                 <a class="navbar-brand" style="color: #f9ad19" href="{{ url('/') }}">
-                    <i class="material-icons">hotel_class</i> <samp>PhamTuanHotel</samp>
+                    <i class="material-icons">hotel_class</i> <samp>Hotel</samp>
                 </a>
 
                 <!-- Menu Admin - Chỉ hiển thị cho admin -->

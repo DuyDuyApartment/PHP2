@@ -148,64 +148,64 @@ class BookingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $bk_ma)
-    {
-        try {
-            $booking = Booking::where('bk_ma', $bk_ma)->first();
+{
+    try {
+        $booking = Booking::where('bk_ma', $bk_ma)->first();
 
-            if (!$booking) {
-                return back()->with('error', 'Không tìm thấy đơn đặt phòng!');
-            }
-
-            DB::beginTransaction();
-
-            $i = $booking->bk_thoiGianBatDau;
-            $o = $booking->bk_thoiGianKetThuc;
-
-            $date1 = date_create($i);
-            $date2 = date_create($o);
-            $diff = date_diff($date1, $date2);
-
-            $no = $booking->p_ma;
-            $currOrders = Booking::where('p_ma', $no)
-                ->where('bk_thoiGianKetThuc', '>=', Carbon::today())
-                ->where('bk_trangThai', '=', 2)
-                ->select('bk_thoiGianBatDau', 'bk_thoiGianKetThuc')
-                ->get();
-
-            $conflict = count($currOrders) != 0;
-            foreach ($currOrders as $books) {
-                if (($i >= $books->bk_thoiGianKetThuc) || ($o <= $books->bk_thoiGianBatDau)) {
-                    $conflict = 0;
-                } else {
-                    $conflict = 1;
-                    break;
-                }
-            }
-
-            if ($conflict == 1) {
-                Session::flash('alert-danger', 'Phòng đã được đặt, vui lòng thông báo khách hàng!');
-                return back()->withInput();
-            }
-
-            $booking->bk_trangThai = 2; // Duyệt
-            $booking->nv_ma = auth()->guard('admin')->user()->id ?? 2;
-            $booking->bk_capNhat = Carbon::now('Asia/Ho_Chi_Minh');
-            $booking->save();
-
-            $phong = Phong::find($booking->p_ma);
-            $phong->p_trangThai = 1; // Đã đặt
-            $phong->save();
-
-            DB::commit();
-
-            Session::flash('alert-success', 'Duyệt đơn đặt phòng thành công!');
-            return redirect()->route('backend.booking.index');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Duyệt booking error: ' . $e->getMessage());
-            return back()->with('error', 'Có lỗi xảy ra khi duyệt đặt phòng.');
+        if (!$booking) {
+            return back()->with('error', 'Không tìm thấy đơn đặt phòng!');
         }
+
+        DB::beginTransaction();
+
+        $i = $booking->bk_thoiGianBatDau;
+        $o = $booking->bk_thoiGianKetThuc;
+
+        $date1 = date_create($i);
+        $date2 = date_create($o);
+        $diff = date_diff($date1, $date2);
+
+        $no = $booking->p_ma;
+        $currOrders = Booking::where('p_ma', $no)
+            ->where('bk_thoiGianKetThuc', '>=', Carbon::today())
+            ->where('bk_trangThai', '=', 2)
+            ->select('bk_thoiGianBatDau', 'bk_thoiGianKetThuc')
+            ->get();
+
+        $conflict = count($currOrders) != 0;
+        foreach ($currOrders as $books) {
+            if (($i >= $books->bk_thoiGianKetThuc) || ($o <= $books->bk_thoiGianBatDau)) {
+                $conflict = 0;
+            } else {
+                $conflict = 1;
+                break;
+            }
+        }
+
+        if ($conflict == 1) {
+            Session::flash('alert-danger', 'Phòng đã được đặt, vui lòng thông báo khách hàng!');
+            return back()->withInput();
+        }
+
+        $booking->bk_trangThai = 2; // Đảm bảo cập nhật thành 2
+        $booking->nv_ma = auth()->guard('admin')->user()->id ?? 2;
+        $booking->bk_capNhat = Carbon::now('Asia/Ho_Chi_Minh');
+        $booking->save();
+
+        $phong = Phong::find($booking->p_ma);
+        $phong->p_trangThai = 2; // Đã đặt
+        $phong->save();
+
+        DB::commit();
+
+        Session::flash('alert-success', 'Duyệt đơn đặt phòng thành công!');
+        return redirect()->route('backend.booking.index');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Duyệt booking error: ' . $e->getMessage());
+        return back()->with('error', 'Có lỗi xảy ra khi duyệt đặt phòng.');
     }
+}
 
     /**
      * Remove the specified resource from storage.

@@ -31,7 +31,16 @@ class HoadonController extends Controller
      */
     public function index()
     {
-        //
+        $db = DB::select('
+        SELECT * FROM loai_phong
+        WHERE lp_trangThai = 2;
+    ');
+    //Thêm đoạn này để lọc ra các phòng đang sử dụng
+    $bookings = DB::select('
+        SELECT * FROM booking
+        WHERE bk_trangThai = 2 AND DATE(bk_thoiGianBatDau) = CURDATE();
+    ');
+    return view('admin.hoadon.index', compact('db', 'bookings'));
     }
 
     /**

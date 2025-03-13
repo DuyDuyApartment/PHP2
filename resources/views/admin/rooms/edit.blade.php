@@ -16,7 +16,7 @@ Chỉnh Sửa Thông Tin Phòng
                 <input type="hidden" name="_method" value="PUT" />
                 {{ csrf_field() }}
                 <div class="form-group">
-                    <label for="lp_ma">Loại sản phẩm</label>
+                    <label for="lp_ma">Loại phòng</label>
                     <select name="lp_ma" class="form-control">
                         @foreach($danhsachphong as $loai)
                             @if($loai->lp_ma == $phong->lp_ma)
@@ -28,7 +28,7 @@ Chỉnh Sửa Thông Tin Phòng
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="p_ten">Tên sản phẩm</label>
+                    <label for="p_ten">Tên phòng</label>
                     <input type="text" class="form-control" id="p_ten" name="p_ten" value="{{ old('phong_ten', $phong->p_ten) }}">
                 </div>
 

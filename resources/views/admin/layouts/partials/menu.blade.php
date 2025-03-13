@@ -17,13 +17,13 @@
         <li id="id1" class="nav-item   ">
           <a class="nav-link" href="{{ url("manager") }}">
             <i class="material-icons">dashboard</i>
-            <p>Dashboard</p>
+            <p>Thống kê doanh số</p>
           </a>
         </li>
         <li  class="nav-item   ">
             <a class="nav-link" href="{{ url("admin") }}">
               <i class="material-icons">store</i>
-              <p>Admin</p>
+              <p>Quản lí phòng</p>
             </a>
           </li>
         <li  id="id2"class="nav-item ">
