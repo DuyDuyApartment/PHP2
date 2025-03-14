@@ -134,9 +134,9 @@ class="w3-display-container w3-grayscale-min">
 
   </div>
 <footer class="w3-center w3-black w3-padding-16">
-  <span>Địa chỉ : Đường 3/2 quận Ninh Kiều TP Cần Thơ</span><br>
-  <span>Liên hệ :0921277127</span><br>
-  <span>Powered by <a href="#" title="W3.CSS" target="_blank" class="w3-hover-text-green">QuocTuanHoTel</a></span>
+  <span>Địa chỉ : 12 Trịnh Đình Thảo, TPHCM</span><br>
+  <span>Liên hệ : 0833 736 809</span><br>
+  <span>Powered by <a href="#" title="W3.CSS" target="_blank" class="w3-hover-text-green">HoTel</a></span>
 </footer>
 
 </div>

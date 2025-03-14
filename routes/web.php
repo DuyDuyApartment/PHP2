@@ -76,7 +76,7 @@ Route::get('/Backend/booking/active', 'Frontend\BookingController@active')->name
 Route::get('orders', 'ExampleController@index')->name('orders');
 Route::get('orders/{id}/create', 'ExampleController@create')->name('orders.create');
 Route::post('orders/store', 'ExampleController@store')->name('orders.store');
-Route::post('orders/{id}/uptate', 'ExampleController@update')->name('orders.update');
+Route::post('orders/{id}/update', 'ExampleController@update')->name('orders.update');
 
 // admin manager
 Route::group(['prefix' => 'manager', 'as' => 'manager.', 'namespace' => 'Admin', 'middleware' => ['auth:admin']], function () {

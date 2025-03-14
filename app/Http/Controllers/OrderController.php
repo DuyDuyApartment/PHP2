@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -12,14 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    
     public function index()
     {
         $db = DB::table('loai_phong')
                 ->where('lp_trangThai', 2)
                 ->get();
         
-        // Debug: Kiểm tra dữ liệu
         \Log::info('Room data:', ['data' => $db]);
         
         return view('user.orders.listlp', compact('db'));
@@ -28,10 +25,8 @@ class OrderController extends Controller
     public function create($id)
     {
         try {
-            // Debug: In ra ID nhận được
             \Log::info('ID received:', ['id' => $id]);
 
-            // Lấy thông tin loại phòng - sử dụng tên bảng chính xác
             $loaiphong = DB::table('loai_phong')
                           ->where('lp_ma', $id)
                           ->first();
@@ -40,10 +35,8 @@ class OrderController extends Controller
                 return back()->with('alert-danger', 'Không tìm thấy loại phòng.');
             }
 
-            // Debug: In ra thông tin loại phòng
             \Log::info('Loại phòng:', ['data' => $loaiphong]);
 
-            // Kiểm tra phòng trống
             $phongTrong = DB::table('phong')
                            ->where('lp_ma', $id)
                            ->where('p_trangThai', 2)
@@ -54,7 +47,6 @@ class OrderController extends Controller
             }
 
             return view('user.orders.create', compact('loaiphong', 'phongTrong'));
-
         } catch (\Exception $e) {
             \Log::error('Error in create: ' . $e->getMessage());
             return back()->with('alert-danger', 'Có lỗi xảy ra: ' . $e->getMessage());
@@ -64,7 +56,6 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
-            // Xác thực dữ liệu từ form
             $request->validate([
                 'p_ma' => 'required|exists:phong,p_ma',
                 'checkin' => 'required|date|after_or_equal:today',
@@ -74,22 +65,18 @@ class OrderController extends Controller
                 'notes' => 'nullable|string',
             ]);
 
-            // Kiểm tra người dùng đã đăng nhập chưa
             if (!auth()->check()) {
                 return back()->with('error', 'Vui lòng đăng nhập để đặt phòng.');
             }
 
-            // Lấy kh_ma từ người dùng đã đăng nhập (giả định kh_ma là id trong bảng khachhang)
-            $kh_ma = auth()->user()->id; // Giả định auth()->user() trả về model KhachHang với id làm kh_ma
+            $kh_ma = auth()->user()->id;
 
-            // Lấy bk_maLoaiPhong từ bảng phong dựa trên p_ma
             $phong = DB::table('phong')->where('p_ma', $request->p_ma)->first();
             if (!$phong) {
                 return back()->with('error', 'Không tìm thấy phòng.');
             }
-            $bk_maLoaiPhong = $phong->lp_ma; // Lấy lp_ma (mã loại phòng) từ bảng phong
+            $bk_maLoaiPhong = $phong->lp_ma;
 
-            // Tính giá tiền (nếu total_price chưa được gửi từ form)
             $loaiphong = DB::table('loai_phong')->where('lp_ma', $bk_maLoaiPhong)->first();
             $checkin = Carbon::parse($request->checkin);
             $checkout = Carbon::parse($request->checkout);
@@ -98,11 +85,10 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Lưu booking (không cập nhật p_trangThai)
             $bookingId = DB::table('booking')->insertGetId([
                 'p_ma' => $request->p_ma,
                 'kh_ma' => $kh_ma,
-                'nv_ma' => 2, // Sử dụng nv_ma = 2 (giá trị hợp lệ từ nhanvien)
+                'nv_ma' => 2,
                 'bk_maLoaiPhong' => $bk_maLoaiPhong,
                 'bk_thoiGianBatDau' => $request->checkin,
                 'bk_thoiGianKetThuc' => $request->checkout,
@@ -112,11 +98,8 @@ class OrderController extends Controller
                 'bk_capNhat' => now()
             ]);
 
-            // Không cập nhật p_trangThai ở đây, giữ nguyên p_trangThai = 2 (Khả dụng)
-
             DB::commit();
 
-            // Redirect về trang create với thông báo thành công
             return redirect()->route('orders.create', $loaiphong->lp_ma)
                             ->with('success', 'Đặt phòng thành công! Vui lòng chờ admin xét duyệt.');
         } catch (\Exception $e) {
@@ -155,11 +138,10 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Cập nhật trạng thái hóa đơn
             DB::table('hoadon')
               ->where('hd_ma', $id)
               ->update([
-                  'hd_trangThai' => 1, // 1 = đã thanh toán
+                  'hd_trangThai' => 1,
               ]);
 
             DB::commit();
@@ -189,6 +171,66 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             \Log::error('Edit booking error: ' . $e->getMessage());
             return back()->with('error', 'Có lỗi xảy ra khi xem thông tin đặt phòng.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            // Xác thực yêu cầu
+            $request->validate([
+                '_token' => 'required',
+            ]);
+
+            // Kiểm tra xem người dùng có quyền hủy đặt phòng này không
+            $booking = DB::table('booking')
+                        ->where('bk_ma', $id)
+                        ->where('kh_ma', auth()->user()->id)
+                        ->first();
+
+            if (!$booking) {
+                return back()->with('error', 'Không tìm thấy đặt phòng hoặc bạn không có quyền hủy.');
+            }
+
+            // Chỉ cho phép hủy nếu trạng thái là "Đang đợi xử lý" (1) hoặc "Đã xác nhận" (2)
+            if ($booking->bk_trangThai != 1 && $booking->bk_trangThai != 2) {
+                return back()->with('error', 'Không thể hủy đặt phòng ở trạng thái này.');
+            }
+
+            DB::beginTransaction();
+
+            // Cập nhật trạng thái đặt phòng thành "Khách đã hủy" (5)
+            DB::table('booking')
+              ->where('bk_ma', $id)
+              ->update([
+                  'bk_trangThai' => 5,
+                  'bk_capNhat' => now()
+              ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đã hủy đặt phòng thành công!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Update booking error: ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi xảy ra khi hủy đặt phòng: ' . $e->getMessage());
+        }
+    }
+
+    public function myBookings()
+    {
+        try {
+            $bookings = DB::select('SELECT DISTINCT *, bk.bk_ma FROM booking as bk
+                INNER JOIN khachhang as kh ON kh.id = bk.kh_ma
+                INNER JOIN nhanvien as nv ON nv.id = bk.nv_ma
+                INNER JOIN phong as p ON p.p_ma = bk.p_ma
+                WHERE bk.kh_ma = ? ORDER BY bk_ma DESC', [auth()->user()->id]);
+
+            return view('user.khachhang.show', ['a' => $bookings]);
+        } catch (\Exception $e) {
+            \Log::error('My bookings error: ' . $e->getMessage());
+            return back()->with('error', 'Có lỗi xảy ra khi tải lịch sử đặt phòng.');
         }
     }
 }

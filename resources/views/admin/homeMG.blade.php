@@ -119,7 +119,7 @@
                             <script>
                                 document.write(new Date().getFullYear())
 
-                            </script>, Pham Tuan Hotel <i class="material-icons">favorite</i>
+                            </script> Hotel <i class="material-icons">favorite</i>
                             your favorite.
                         </div>
                     </div>

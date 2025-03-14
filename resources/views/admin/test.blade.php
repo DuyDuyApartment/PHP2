@@ -20,7 +20,7 @@ use DB;
 
 <!DOCTYPE html>
 <html>
-<title>Quoc Tuan Hotel | ADMIN</title>
+<title>Hotel | ADMIN</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="lib\css\w3.css">

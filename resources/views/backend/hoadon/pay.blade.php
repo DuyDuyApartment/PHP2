@@ -50,7 +50,7 @@
               <p class="item-name">Thời Gian ở đến ngày</p>
             </div>
             <div class="item">
-                <span class="price">{{$user->lp_giaBan}}.000 VND</span>
+                <span class="price">{{$user->lp_giaBan}} VND</span>
                 <p class="item-name">Giá phòng</p>
               </div>
             <div class="item">
@@ -58,7 +58,7 @@
                 <p class="item-name">Tổng số ngày </p>
               </div>
 
-            <div class="total">Total<span class="price">{{$giatien}}.000 VND</span></div>
+            <div class="total">Total<span class="price">{{$giatien}} VND</span></div>
           </div>
           <div class="card-details">
             {{-- <h3 class="title">Credit Card Details</h3>

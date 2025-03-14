@@ -30,7 +30,7 @@
             </div>
             <div class="price">
                 <div class="inner">
-                    {{ number_format($loaiphong->lp_giaBan, 0, ',', '.') }}.000 VNĐ <span>mỗi đêm</span>
+                    {{ number_format($loaiphong->lp_giaBan, 0, ',', '.') }} VNĐ <span>mỗi đêm</span>
                 </div>
             </div>
         </div>
